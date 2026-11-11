@@ -105,6 +105,9 @@ function App() {
   const startListeningRef = useRef(null);
   const [handsFree, setHandsFree] = useState(false);
   const [liveCaption, setLiveCaption] = useState("");
+  const finalBufferRef = useRef("");
+  const interimRef = useRef("");
+  const silenceTimerRef = useRef(null);
 
   // Keep the newest conversation message visible.
   useEffect(() => {
@@ -484,7 +487,7 @@ function App() {
 
     const recognition = new SpeechRecognition();
 
-    recognition.continuous = false;
+    recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = "en-IN";
 
@@ -492,56 +495,50 @@ function App() {
       setIsListening(true);
     };
 
-    // recognition.onresult = (event) => {
-    //   const transcript = event.results[0][0].transcript;
 
-    //   if (transcript.trim()) {
-    //     sendMessage(transcript);
-    //   }
-    // };
+//     recognition.onresult = (event) => {
+//   let interim = "";
+//   let final = "";
 
-    recognition.onresult = (event) => {
+//   for (let i = event.resultIndex; i < event.results.length; i++) {
+//     const text = event.results[i][0].transcript;
+//     if (event.results[i].isFinal) final += text;
+//     else interim += text;
+//   }
+
+//   setLiveCaption(interim || final);
+
+//   if (final.trim()) {
+//     setLiveCaption("");
+//     sendMessage(final);
+//   }
+// };
+
+  recognition.onresult = (event) => {
   let interim = "";
-  let final = "";
-
   for (let i = event.resultIndex; i < event.results.length; i++) {
-    const text = event.results[i][0].transcript;
-    if (event.results[i].isFinal) final += text;
-    else interim += text;
+    const t = event.results[i][0].transcript;
+    if (event.results[i].isFinal) finalBufferRef.current += " " + t;
+    else interim += t;
   }
+  interimRef.current = interim;
+  const full = (finalBufferRef.current + " " + interim).trim();
+  setLiveCaption(full);
 
-  setLiveCaption(interim || final);
-
-  if (final.trim()) {
+  // Wait for 1.8s of real silence before treating the turn as finished
+  clearTimeout(silenceTimerRef.current);
+  silenceTimerRef.current = setTimeout(() => {
+    const text = full.trim();
+    finalBufferRef.current = "";
+    interimRef.current = "";
+    if (!text) return;
+    try { recognitionRef.current?.stop(); } catch {}
     setLiveCaption("");
-    sendMessage(final);
-  }
+    sendMessage(text);
+  }, 1800);
 };
 
-    // recognition.onerror = (event) => {
-    //   const errors = {
-    //     "not-allowed":
-    //       "Microphone permission denied. Please allow microphone access in Chrome.",
-    //     "service-not-allowed": "Speech recognition service is unavailable.",
-    //     "no-speech": "No speech detected. Please try again.",
-    //     "audio-capture":
-    //       "No microphone was detected. Check your microphone connection.",
-    //     network: "Speech recognition network error. Please try again."
-    //   };
-
-    //   setVoiceError(
-    //     errors[event.error] || "Something went wrong with voice recognition."
-    //   );
-
-    //   setIsListening(false);
-    // };
-
-    // recognition.onend = () => {
-    //   setIsListening(false);
-    //   recognitionRef.current = null;
-    // };
-
-    recognition.onerror = (event) => {
+  recognition.onerror = (event) => {
             if (event.error === "aborted") {
         setIsListening(false);
         return;
@@ -568,13 +565,28 @@ function App() {
       }
     };
 
-    recognition.onend = () => {
-      setIsListening(false);
-      recognitionRef.current = null;
+  recognition.onend = () => {
+  setIsListening(false);
+  recognitionRef.current = null;
+  setLiveCaption("");
+
+  // If Chrome ended the session before our timer fired, send what we have
+  const pending = (finalBufferRef.current + " " + interimRef.current).trim();
+  if (pending) {
+    clearTimeout(silenceTimerRef.current);
+    finalBufferRef.current = "";
+    interimRef.current = "";
+    sendMessage(pending);
+  }
+};
+
+    // recognition.onend = () => {
+    //   setIsListening(false);
+    //   recognitionRef.current = null;
       
-      // Add this line to clear the caption:
-      setLiveCaption("");
-    };
+    //   // Add this line to clear the caption:
+    //   setLiveCaption("");
+    // };
 
     recognitionRef.current = recognition;
 
