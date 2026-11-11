@@ -181,35 +181,6 @@ function App() {
     setIsSidebarOpen(false);
   };
 
-  // Text-to-speech.
-  // const speakResponse = (text) => {
-  //   if (!("speechSynthesis" in window)) {
-  //     setVoiceError("Speech output is not supported by this browser.");
-  //     return;
-  //   }
-
-  //   window.speechSynthesis.cancel();
-
-  //   const utterance = new SpeechSynthesisUtterance(text);
-
-  //   utterance.lang = "en-IN";
-  //   utterance.rate = 1;
-  //   utterance.pitch = 1;
-
-  //   utterance.onstart = () => {
-  //     setIsSpeaking(true);
-  //   };
-
-  //   utterance.onend = () => {
-  //     setIsSpeaking(false);
-  //   };
-
-  //   utterance.onerror = () => {
-  //     setIsSpeaking(false);
-  //   };
-
-  //   window.speechSynthesis.speak(utterance);
-  // };
 
   const speakResponse = (rawText) => {
   const text = rawText.replace(/[*_#]/g, "").replace(/\u2011/g, "-");
@@ -348,17 +319,6 @@ function App() {
         throw new Error("The AI returned an empty response.");
       }
 
-      // setResponseMode("gemini");
-
-      // setMessages((previous) => [
-      //   ...previous.filter((message) => !message.isError),
-      //   {
-      //     id: Date.now() + 1,
-      //     role: "assistant",
-      //     text: data.reply,
-      //     source: "gemini"
-      //   }
-      // ]);
             const provider =
         typeof data.provider === "string" ? data.provider : "ai";
 
@@ -496,24 +456,6 @@ function App() {
     };
 
 
-//     recognition.onresult = (event) => {
-//   let interim = "";
-//   let final = "";
-
-//   for (let i = event.resultIndex; i < event.results.length; i++) {
-//     const text = event.results[i][0].transcript;
-//     if (event.results[i].isFinal) final += text;
-//     else interim += text;
-//   }
-
-//   setLiveCaption(interim || final);
-
-//   if (final.trim()) {
-//     setLiveCaption("");
-//     sendMessage(final);
-//   }
-// };
-
   recognition.onresult = (event) => {
   let interim = "";
   for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -580,13 +522,6 @@ function App() {
   }
 };
 
-    // recognition.onend = () => {
-    //   setIsListening(false);
-    //   recognitionRef.current = null;
-      
-    //   // Add this line to clear the caption:
-    //   setLiveCaption("");
-    // };
 
     recognitionRef.current = recognition;
 
@@ -686,15 +621,6 @@ const handleMicClick = () => {
     .map((message) => message.text.trim())
     .filter(Boolean);
 
-  // const assistantStatus = isListening
-  //   ? "Listening"
-  //   : isSpeaking
-  //     ? "Speaking"
-  //     : isLoading
-  //       ? "Thinking"
-  //       : responseMode === "local"
-  //         ? "Local demo mode"
-  //         : "Gemini mode";
 
 const assistantStatus = isListening
   ? "Listening"
@@ -962,72 +888,7 @@ const assistantStatus = isListening
                 cancellations or business growth.
               </p>
             </div>
-
-            {/* VOICE INTERACTION */}
-            {/* <div className={`voice-area ${isListening ? "listening" : ""}`}>
-
-              <button onClick={toggleHandsFree}>
-                {handsFree ? "End call" : "Start call"}
-              </button>
-              {liveCaption && <p className="live-caption">{liveCaption}</p>}
-              
-              <button
-                type="button"
-                className={`voice-mic-button ${isListening ? "active" : ""}`}
-                onClick={isListening ? stopListening : startListening}
-                disabled={isLoading || isSpeaking}
-                aria-label={
-                  isListening ? "Stop listening" : "Start voice interaction"
-                }
-              >
-                <div className="voice-ring">
-                  <div className="voice-inner">
-                    <Mic size={30} />
-                  </div>
-                </div>
-              </button>
-
-              <p className="voice-label">
-                {isListening
-                  ? "Listening... Speak now"
-                  : isSpeaking
-                    ? "Your AI assistant is speaking..."
-                    : isLoading
-                      ? "Analysing your request..."
-                      : "Talk to your AI account manager"}
-              </p>
-
-              <span className="voice-subtitle">
-                {isListening
-                  ? "Your microphone is active. Speak clearly."
-                  : isSpeaking
-                    ? "Your response is being read aloud."
-                    : "Click the microphone to start a conversation."}
-              </span>
-
-              {isSpeaking && (
-                <button
-                  type="button"
-                  className="stop-speaking-button"
-                  onClick={stopSpeaking}
-                >
-                  <VolumeX size={14} />
-                  Stop speaking
-                </button>
-              )}
-
-              {voiceError && (
-                <p className="voice-error" role="alert">
-                  {voiceError}
-                </p>
-              )}
-
-              {!speechSupported && (
-                <p className="voice-fallback">
-                  Text input is available below.
-                </p>
-              )}
-            </div> */}
+            
             <div className={`voice-area ${isListening ? "listening" : ""}`}>
 
               {/* FIXED: Added type and className here so the CSS applies */}
