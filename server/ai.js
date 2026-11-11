@@ -67,7 +67,7 @@ const VOICE_RULES = `
 VOICE RULES (your words are spoken aloud on a phone call):
 - Reply in 2 to 3 short sentences, under 60 words. Recommendations and the final summary may use up to 90 words.
 - Plain spoken English only. No bullet points, no numbered lists, no bold, no headings, no emojis.
-- Say numbers like a person: "two lakh", "one lakh thirty-five thousand", "thirty-two percent".
+- Say numbers like a person: "two lakh", "one lakh thirty-five thousand", "thirty-two point 5 percent".
 - Ask only one question, and put it at the end.
 - Do not repeat figures the seller already heard.
 - Average selling price is unchanged at five hundred rupees, so the drop is in order volume, not price per order. Say that if it comes up.
